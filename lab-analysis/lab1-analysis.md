@@ -27,7 +27,8 @@ A user should only be able to insert a value between the given boundaries.
 
 
 ### Activity 1.2 — Bug analysis (error → fault → failure)
-1. **Human error**
+1. 
+**Human error**
 The developer missed to add an "=" in the Rule 2 implementation of BookingService (src/main/java/service/BookingService.java). Probably also missed to test it.
 
 **Fault**
