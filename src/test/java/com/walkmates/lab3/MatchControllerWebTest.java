@@ -1,21 +1,25 @@
 package com.walkmates.lab3;
 
-import com.walkmates.repository.ListingRepository;
-import com.walkmates.repository.SeekerRepository;
-import com.walkmates.service.ai.MatchExplanationService;
-import com.walkmates.web.MatchController;
+import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Optional;
-
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.walkmates.model.Listing;
+import com.walkmates.model.ListingType;
+import com.walkmates.model.Seeker;
+import com.walkmates.repository.ListingRepository;
+import com.walkmates.repository.SeekerRepository;
+import com.walkmates.service.ai.MatchExplanationService;
+import com.walkmates.web.MatchController;
 
 /**
  * Lab 3, Part A (interface rung) — testing the AI feature through its HTTP boundary with
@@ -44,6 +48,20 @@ class MatchControllerWebTest {
 
         mvc.perform(get("/api/match/missing/explain").param("listingId", "l1"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("GET explain returns 200 and JSON body when the seeker and listing exist")
+    void explainReturns200WhenSeekerAndListingExist() throws Exception {
+        Seeker seeker = new Seeker("seeker1@example.com", "Pat", "0701112233");
+        Listing listing = new Listing("l1", "Walk Rex", "Friendly dog", ListingType.DOG_WALK);
+        when(seekers.findById("seeker1")).thenReturn(Optional.of(seeker));
+        when(listings.findById("l1")).thenReturn(Optional.of(listing));
+        when(matchExplanation.explainMatch(seeker, listing)).thenReturn("This is a test explanation.");
+
+        mvc.perform(get("/api/match/seeker1/explain").param("listingId", "l1"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"explanation\":\"This is a test explanation.\"}"));
     }
 
     // TODO: stub a seeker + listing and a canned explanation, assert 200 + JSON body.
